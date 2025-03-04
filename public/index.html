@@ -3,63 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Combat de Typing Speed - Multi</title>
+  <title>Combat de Typing Speed - Modern</title>
   <!-- Google Fonts pour une typographie moderne -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="/socket.io/socket.io.js"></script>
   <script defer src="script.js"></script>
   <style>
+    /* Reset et styles de base */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
       color: #333;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
     }
-    h1 { margin-bottom: 10px; }
-    button, input { font-size: 1rem; padding: 10px; margin: 5px; border: none; border-radius: 5px; }
-    button { background-color: #007bff; color: #fff; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    .container { padding: 20px; }
-    #waitingRoom, #gameContainer { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-    #gameContainer { display: none; }
-    #playersList { margin-top: 20px; }
-    #playersList p { margin: 5px 0; }
+    .container {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      padding: 30px;
+      margin: 20px;
+      width: 90%;
+      max-width: 500px;
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #222;
+    }
+    button, input {
+      border: none;
+      outline: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    button {
+      background-color: #5a67d8;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #434190;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+    }
+    /* Sections */
+    #waitingRoom, #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #waitingRoom { margin-bottom: 30px; }
+    #playersList {
+      width: 100%;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    #playersList h2 {
+      margin-bottom: 10px;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+    #playersList p {
+      font-size: 1rem;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+    /* Mot à taper */
     #word {
-      font-size: 2.5rem; font-weight: bold; background: #fff; padding: 20px; border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
-      opacity: 0; animation: fadeIn 1s forwards;
-    }
-    #gameInput {
-      width: 100%; max-width: 400px; font-size: 1.5rem; padding: 15px; border: none;
-      border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    #gameInput:focus { outline: none; box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); }
-    #scoreboard {
-      margin-top: 30px; width: 100%; max-width: 400px; background: #fff; padding: 20px;
-      border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    #scoreboard h2 { margin-bottom: 10px; }
-    #scoreboard p { font-size: 1.2rem; margin-bottom: 5px; }
-    #timer { font-size: 1.5rem; margin-bottom: 20px; }
-    #winnerMessage {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      font-size: 2rem; color: #fff; text-shadow: 2px 2px 5px #000; z-index: 1001; text-align: center;
-      display: none;
-    }
-    #fireworksCanvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: #e2e8f0;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      width: 100%;
+      animation: fadeIn 0.8s ease-in-out;
+      /* Désactive la sélection et la copie */
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+    /* Input de jeu */
+    /* Désactive l'autocomplétion et la correction sur mobile via les attributs HTML */
+    #gameInput {
+      width: 100%;
+      margin-bottom: 20px;
+      padding: 15px;
+      font-size: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      text-align: center;
+    }
+    /* Scoreboard */
+    #scoreboard {
+      width: 100%;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    #scoreboard h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+    #scoreboard p {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    /* Timer */
+    #timer {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    /* Messages d'erreur et de victoire/défaite */
+    #errorMessage {
+      color: #e53e3e;
+      text-align: center;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    #winnerMessage {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem;
+      color: #fff;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+    }
+    /* Canvas pour les feux d'artifice */
+    #fireworksCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    /* Responsive */
     @media (max-width: 600px) {
+      .container { padding: 20px; }
+      h1 { font-size: 1.8rem; }
       #word { font-size: 2rem; padding: 15px; }
-      #gameInput { font-size: 1.2rem; padding: 10px; }
-      #scoreboard p { font-size: 1rem; }
+      #gameInput { font-size: 1rem; padding: 10px; }
+      #timer { font-size: 1.2rem; }
     }
   </style>
 </head>
@@ -67,31 +184,32 @@
   <!-- Salle d'attente -->
   <div id="waitingRoom" class="container">
     <h1>Salle d'attente</h1>
-    <div id="nameInputContainer">
-      <input id="playerName" type="text" placeholder="Entrez votre nom" />
-      <button id="setNameBtn">Valider</button>
-    </div>
+    <input id="playerName" type="text" placeholder="Votre nom" />
+    <button id="setNameBtn">Valider</button>
+    <button id="createGameBtn">Créer partie</button>
     <button id="readyBtn">Je suis prêt</button>
-    <div id="masterControls" style="display: none;">
+    <div id="masterControls" style="display:none;">
       <button id="startGameBtn">Démarrer la partie</button>
     </div>
-    <div id="errorMessage" style="color: red;"></div>
+    <div id="errorMessage"></div>
     <div id="playersList">
       <h2>Joueurs connectés</h2>
-      <!-- Liste des joueurs -->
+      <!-- La liste des joueurs sera injectée ici -->
     </div>
   </div>
   
   <!-- Partie en cours -->
   <div id="gameContainer" class="container">
-    <div id="timer">Temps: 0s</div>
+    <div id="timer">Temps: 0.00 s</div>
     <div id="wordContainer">
-      <div id="word">Chargement...</div>
+      <!-- Ajout d'attributs pour empêcher la copie et le menu contextuel -->
+      <div id="word" oncopy="return false;" oncontextmenu="return false;">Chargement...</div>
     </div>
-    <input id="gameInput" type="text" placeholder="Tapez le mot ici..." autofocus>
+    <!-- Désactivation de l'autocomplétion pour mobile -->
+    <input id="gameInput" type="text" placeholder="Tapez le mot ici..." autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div id="scoreboard">
       <h2>Scores</h2>
-      <!-- Scores -->
+      <!-- Les scores seront mis à jour ici -->
     </div>
   </div>
   

@@ -8,6 +8,7 @@ socket.on('connect', () => {
 const waitingRoom = document.getElementById('waitingRoom');
 const playerNameInput = document.getElementById('playerName');
 const setNameBtn = document.getElementById('setNameBtn');
+const createGameBtn = document.getElementById('createGameBtn');
 const readyBtn = document.getElementById('readyBtn');
 const masterControls = document.getElementById('masterControls');
 const startGameBtn = document.getElementById('startGameBtn');
@@ -21,7 +22,7 @@ const wordDisplay = document.getElementById('word');
 const gameInput = document.getElementById('gameInput');
 const scoreboard = document.getElementById('scoreboard');
 
-// --- Message de victoire et animation des feux d'artifice ---
+// --- Message de victoire/défaite et animation des feux d'artifice ---
 const winnerMessage = document.getElementById('winnerMessage');
 const canvas = document.getElementById('fireworksCanvas');
 const ctx = canvas.getContext('2d');
@@ -92,15 +93,17 @@ function startFireworks() {
   setTimeout(() => { clearInterval(interval); }, 5000);
 }
 
-// --- Gestion du timer ---
+// --- Gestion du timer avec centièmes ---
 let startTime = null;
 let timerInterval = null;
 function startTimer(startTimestamp) {
     startTime = startTimestamp;
     timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        timerDisplay.textContent = `Temps: ${elapsed}s`;
-    }, 1000);
+        const elapsed = Date.now() - startTime;
+        const seconds = Math.floor(elapsed / 1000);
+        const centiseconds = Math.floor((elapsed % 1000) / 10);
+        timerDisplay.textContent = `Temps: ${seconds}.${centiseconds.toString().padStart(2, '0')} s`;
+    }, 10);
 }
 
 // --- Événements de la salle d'attente ---
@@ -109,6 +112,9 @@ setNameBtn.addEventListener('click', () => {
     if(name) {
         socket.emit('setName', name);
     }
+});
+createGameBtn.addEventListener('click', () => {
+    socket.emit('createGame');
 });
 readyBtn.addEventListener('click', () => {
     socket.emit('playerReady');
@@ -126,11 +132,17 @@ socket.on('updatePlayers', (data) => {
         html += `<p>${p.name} ${id === masterId ? '(Maître)' : ''} - ${p.ready ? 'Prêt' : 'En attente'} - Mots validés: ${p.score}</p>`;
     }
     playersList.innerHTML = html;
-    // Affiche les contrôles du maître si c'est vous
-    if(mySocketId === masterId) {
-        masterControls.style.display = 'block';
+    // Affiche le bouton "Créer partie" si aucun maître n'est défini
+    if (masterId === null) {
+      createGameBtn.style.display = 'block';
+      masterControls.style.display = 'none';
     } else {
+      createGameBtn.style.display = 'none';
+      if (mySocketId === masterId) {
+        masterControls.style.display = 'block';
+      } else {
         masterControls.style.display = 'none';
+      }
     }
 });
 
@@ -163,9 +175,14 @@ socket.on('updateScore', (players) => {
     }
     scoreboard.innerHTML = html;
 });
-socket.on('gameOver', (winnerId) => {
+socket.on('gameOver', (data) => {
     clearInterval(timerInterval);
-    winnerMessage.textContent = `Le joueur ${winnerId} a gagné ! 🎉`;
+    // data contient winnerId et winnerName
+    if (mySocketId === data.winnerId) {
+        winnerMessage.textContent = `Vous avez gagné ! Félicitations ${data.winnerName} 🎉`;
+    } else {
+        winnerMessage.textContent = `Défaite... ${data.winnerName} a gagné la partie.`;
+    }
     winnerMessage.style.display = 'block';
     startFireworks();
     setTimeout(() => { location.reload(); }, 7000);
