@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combat de Typing Speed - Multi</title>
+  <!-- Google Fonts pour une typographie moderne -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="script.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      color: #333;
+      overflow: hidden;
+    }
+    h1 { margin-bottom: 10px; }
+    button, input { font-size: 1rem; padding: 10px; margin: 5px; border: none; border-radius: 5px; }
+    button { background-color: #007bff; color: #fff; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    .container { padding: 20px; }
+    #waitingRoom, #gameContainer { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+    #gameContainer { display: none; }
+    #playersList { margin-top: 20px; }
+    #playersList p { margin: 5px 0; }
+    #word {
+      font-size: 2.5rem; font-weight: bold; background: #fff; padding: 20px; border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px;
+      opacity: 0; animation: fadeIn 1s forwards;
+    }
+    #gameInput {
+      width: 100%; max-width: 400px; font-size: 1.5rem; padding: 15px; border: none;
+      border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    #gameInput:focus { outline: none; box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); }
+    #scoreboard {
+      margin-top: 30px; width: 100%; max-width: 400px; background: #fff; padding: 20px;
+      border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    #scoreboard h2 { margin-bottom: 10px; }
+    #scoreboard p { font-size: 1.2rem; margin-bottom: 5px; }
+    #timer { font-size: 1.5rem; margin-bottom: 20px; }
+    #winnerMessage {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 2rem; color: #fff; text-shadow: 2px 2px 5px #000; z-index: 1001; text-align: center;
+      display: none;
+    }
+    #fireworksCanvas {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @media (max-width: 600px) {
+      #word { font-size: 2rem; padding: 15px; }
+      #gameInput { font-size: 1.2rem; padding: 10px; }
+      #scoreboard p { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Salle d'attente -->
+  <div id="waitingRoom" class="container">
+    <h1>Salle d'attente</h1>
+    <div id="nameInputContainer">
+      <input id="playerName" type="text" placeholder="Entrez votre nom" />
+      <button id="setNameBtn">Valider</button>
+    </div>
+    <button id="readyBtn">Je suis prêt</button>
+    <div id="masterControls" style="display: none;">
+      <button id="startGameBtn">Démarrer la partie</button>
+    </div>
+    <div id="errorMessage" style="color: red;"></div>
+    <div id="playersList">
+      <h2>Joueurs connectés</h2>
+      <!-- Liste des joueurs -->
+    </div>
+  </div>
+  
+  <!-- Partie en cours -->
+  <div id="gameContainer" class="container">
+    <div id="timer">Temps: 0s</div>
+    <div id="wordContainer">
+      <div id="word">Chargement...</div>
+    </div>
+    <input id="gameInput" type="text" placeholder="Tapez le mot ici..." autofocus>
+    <div id="scoreboard">
+      <h2>Scores</h2>
+      <!-- Scores -->
+    </div>
+  </div>
+  
+  <div id="winnerMessage"></div>
+  <canvas id="fireworksCanvas"></canvas>
+</body>
+</html>
